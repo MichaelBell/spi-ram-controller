@@ -1,0 +1,12 @@
+*.swp
+*.asc
+*.bin
+*.log
+nanoV.json
+
+__pycache__/
+*.vcd
+results.xml
+stats.md
+sim_build/
+
