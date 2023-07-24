@@ -7,6 +7,8 @@ module spi_demo_top (
     output spi_clk_out,
     output spi_mosi,
 
+    input button2,
+
     output led1,
     output led2,
     output led3,
@@ -20,8 +22,70 @@ module spi_demo_top (
     output lcol3,
     output lcol4);
 
+    reg [23:0] counter;
     reg [15:0] spi_addr;
-    
+    wire [31:0] spi_data_out;
+    wire [31:0] spi_data_in = {spi_addr, counter[23:8]};
+
+    reg [31:0] data;
+
+    reg spi_start_read;
+    reg spi_start_write;
+    reg spi_read_done;
+    wire busy;
+
+    spi_ram_controller spi (
+                .clk(clk12MHz),
+                .rstn(rstn),
+
+                .spi_miso(spi_miso),
+                .spi_select(spi_select),
+                .spi_clk_out(spi_clk_out),
+                .spi_mosi(spi_mosi),
+
+                .addr_in(spi_addr),
+                .data_in(spi_data_in),
+                .start_read(spi_start_read),
+                .start_write(spi_start_write),
+                .data_out(spi_data_out),
+                .busy(busy)
+        );
+
+    always @(posedge clk12MHz) begin
+        if (!rstn) begin
+            spi_addr <= 0;
+            counter <= 0;
+            spi_start_read <= 0;
+            spi_start_write <= 0;
+            spi_read_done <= 0;
+            data <= 1;
+        end else begin
+            counter <= counter + 1;
+            if (!button2) begin
+                spi_start_read <= 0;
+                spi_read_done <= 0;
+                if (!busy && counter[7:0] == 0) begin
+                    spi_start_write <= 1;
+                    spi_addr <= spi_addr + 4;
+                end else begin
+                    spi_start_write <= 0;
+                end
+            end else begin
+                spi_start_write <= 0;
+                if (counter[22:0] == 0 && !busy) begin
+                    spi_start_read <= 1;
+                    spi_read_done <= 0;
+                    spi_addr <= spi_addr + 4;
+                end else begin
+                    spi_start_read <= 0;
+                    if (!busy && !spi_read_done) begin
+                        spi_read_done <= 1;
+                        data <= spi_data_out;
+                    end
+                end
+            end
+        end
+    end
 
     // map the output of ledscan to the port pins
     wire [7:0] leds_out;

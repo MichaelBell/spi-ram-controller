@@ -12,7 +12,7 @@ iceFUN: synth
 
 synth:
 	# Synthesize using Yosys
-	yosys -p "synth_ice40 -top spi_top -json $(PROJ).json" -DICE40 $(FILES) > yosys.log
+	yosys -p "synth_ice40 -top spi_demo_top -json $(PROJ).json" -DICE40 $(FILES) > yosys.log
 	@grep Warn yosys.log || true
 	@grep Error yosys.log || true
 	@grep "   Number of cells" yosys.log

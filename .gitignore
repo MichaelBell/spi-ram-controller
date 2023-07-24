@@ -2,7 +2,7 @@
 *.asc
 *.bin
 *.log
-nanoV.json
+spi-demo.json
 
 __pycache__/
 *.vcd

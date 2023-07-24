@@ -43,6 +43,8 @@ initial begin
 end
 `endif
 
+`define max(a, b) (a > b) ? a : b
+
     localparam DATA_WIDTH_BITS = DATA_WIDTH_BYTES * 8;
 
     localparam FSM_IDLE = 0;
@@ -55,7 +57,7 @@ end
     reg spi_miso_buf;
     reg [ADDR_BITS-1:0]       addr;
     reg [DATA_WIDTH_BITS-1:0] data;
-    reg [$clog2($max(DATA_WIDTH_BITS,ADDR_BITS))-1:0] bits_remaining;
+    reg [$clog2(`max(DATA_WIDTH_BITS,ADDR_BITS))-1:0] bits_remaining;
 
     assign data_out = data;
     assign busy = fsm_state != FSM_IDLE;
