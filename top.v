@@ -7,7 +7,9 @@ module spi_demo_top (
     output spi_clk_out,
     output spi_mosi,
 
-    input button2,
+    input button1,   // When pressed, increases time between read operations
+    input button2,   // When pressed, writes data to the SPI RAM instead of reading it
+    input button3,   // When pressed, increments address by 1 each cycle instead of 4
 
     output led1,
     output led2,
@@ -64,7 +66,8 @@ module spi_demo_top (
             if (!button2) begin
                 spi_start_read <= 0;
                 spi_read_done <= 0;
-                if (!busy && counter[7:0] == 0) begin
+                spi_addr[1:0] <= 0;
+                if (!busy && counter[7:0] == 0 && spi_addr[1:0] == 0) begin
                     spi_start_write <= 1;
                     spi_addr <= spi_addr + 4;
                 end else begin
@@ -72,10 +75,10 @@ module spi_demo_top (
                 end
             end else begin
                 spi_start_write <= 0;
-                if (counter[22:0] == 0 && !busy) begin
+                if ((button1 ? (counter[15:0] == 0) : (counter[22:0] == 0)) && !busy) begin
                     spi_start_read <= 1;
                     spi_read_done <= 0;
-                    spi_addr <= spi_addr + 4;
+                    spi_addr <= spi_addr + (button3 ? 4 : 1);
                 end else begin
                     spi_start_read <= 0;
                     if (!busy && !spi_read_done) begin
